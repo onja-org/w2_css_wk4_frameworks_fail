@@ -137,3 +137,6 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Generated CSS (compiled from SCSS / built by Tailwind)
+03-sass/css/

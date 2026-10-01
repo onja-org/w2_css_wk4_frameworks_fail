@@ -10,7 +10,7 @@ Right now the HTML file has Tailwind classes, but no Tailwind CSS is installed o
 ## Step-by-Step Setup Guide
 
 ### 1. Navigate to the Right Directory
-You should currently be in the main lab directory. Let's move to the Tailwind project:
+You should currently be in the `lab/` folder. Let's move to the Tailwind project:
 
 ```bash
 cd 02-tailwind
@@ -26,7 +26,7 @@ cd 02-tailwind
 - `SETUP-INSTRUCTIONS.md` (this file)
 
 ### 2. Check Project Dependencies
-The project dependencies (including Tailwind CSS) are already installed in the root directory's `package.json`. You don't need to run `npm init` or `npm install` - the required packages are already available!
+The project dependencies (including Tailwind CSS) are listed in `lab/package.json`, one folder up. If you ran `npm install` from inside `lab/` when you started the lab, they're already installed. You don't need to run `npm init` or create a new `package.json`.
 
 ### 3. Generate Tailwind Configuration Files
 Tailwind needs configuration files to know how to work:
@@ -88,7 +88,7 @@ Open `src/input.css` and add these three essential Tailwind directives:
 - `utilities`: All the utility classes like `bg-amber-900`, `text-3xl`, etc.
 
 ### 6. Build Your CSS Using Local Tailwind
-Since Tailwind CSS is installed in the root directory, we'll use npx to access it:
+Since Tailwind CSS is installed in `lab/node_modules`, we'll use npx to access it:
 Create the output directory and run the build:
 
 ```bash
@@ -97,7 +97,7 @@ npx tailwindcss -i ./src/input.css -o ./dist/output.css --watch
 ```
 
 **What does this do?** 
-- `npx tailwindcss`: Uses the Tailwind CLI installed in the root directory
+- `npx tailwindcss`: Uses the Tailwind CLI installed in `lab/node_modules`
 - `-i ./src/input.css`: Input file (the one with @tailwind directives)
 - `-o ./dist/output.css`: Output file (the compiled CSS)
 - `--watch`: Automatically rebuild when files change
@@ -109,7 +109,26 @@ npx tailwindcss -i ./src/input.css -o ./dist/output.css --watch
 
 **Leave it running!** This command will keep watching for changes. Open a new terminal window/tab for the next steps.
 
-### 7. Link CSS to HTML
+### 7. Save the Build Command as an npm Script
+Typing that long command every time is error-prone. Save it as a script so anyone on the project can run it with one short command.
+
+Open `lab/package.json` (one folder up from `02-tailwind/`) and add this line inside `"scripts"`:
+
+```json
+"build:css": "cd 02-tailwind && tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
+```
+
+**Why the `cd 02-tailwind`?** npm scripts run from the folder that holds `package.json` (`lab/`). Tailwind looks for `./*.html` relative to the folder it runs in, so the script moves into `02-tailwind/` first.
+
+**Try it:** stop the running build with `Ctrl+C`, then from the `lab/` folder run:
+
+```bash
+npm run build:css
+```
+
+You should see the same "Done in Xms" message, and the command keeps watching like before.
+
+### 8. Link CSS to HTML
 Open `index.html` and find this comment near the top:
 ```html
 <!-- TODO: Link to compiled Tailwind CSS file once build is working -->
@@ -122,7 +141,7 @@ Replace it with:
 
 **Save the HTML file!** Don't forget to save your changes.
 
-### 8. Test Your Setup
+### 9. Test Your Setup
 Open `index.html` in your browser. If everything worked:
 - ✅ The page should have a beautiful amber/brown color scheme
 - ✅ The header should have a dark amber background
@@ -139,13 +158,14 @@ Open `index.html` in your browser. If everything worked:
 - [ ] Is the file large (probably 50KB+) with lots of CSS rules?
 - [ ] Does the webpage look styled when you open it in the browser?
 - [ ] If you change a class in the HTML and save, does the build command detect the change?
+- [ ] Does `npm run build:css` (from `lab/`) start the Tailwind build?
 
 ## When You're Done
 🎉 **Congratulations!** You've successfully set up a Tailwind CSS project from scratch. 
 
 **Keep the build command running** - you'll need it for the diagnostic section where you'll be fixing broken utility classes.
 
-**Next:** Move on to the DIAGNOSTIC section to find and fix the broken Tailwind classes in the HTML!
+**Next:** Move on to the DIAGNOSTIC section in `index.html` to find and fix the 8 broken Tailwind classes!
 
 ---
 

@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer");
 const path = require("path");
 
 async function runDiagnosticTests() {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({ headless: "shell", args: ["--no-sandbox", "--disable-setuid-sandbox"] });
   const page = await browser.newPage();
 
   // Load the local HTML file
@@ -43,10 +43,10 @@ async function runDiagnosticTests() {
 
     if (!navHasCorrectFlex) {
       console.log(
-        "❌ Test 2: Navigation links should align horizontally (hint: check your flexbox justify properties)"
+        "❌ Test 2: Navigation links should be centered in the header (hint: check your flexbox justify properties)"
       );
     } else {
-      console.log("✅ Test 2: Navigation links are horizontally aligned");
+      console.log("✅ Test 2: Navigation links are centered in the header");
       passedTests++;
     }
   } catch (error) {
@@ -144,7 +144,7 @@ async function runDiagnosticTests() {
     // Trigger hover
     await page.hover(".harvest-btn");
     // Wait a bit for the hover effect to apply
-    await page.waitForTimeout(200);
+    await new Promise(resolve => setTimeout(resolve, 200)); // page.waitForTimeout was removed in Puppeteer 22
 
     // Get background color after hover
     const hoverBg = await page.evaluate(() => {
@@ -154,7 +154,9 @@ async function runDiagnosticTests() {
 
     const expectedHoverBg = "rgb(219, 112, 147)"; // Expected hover color
     if (hoverBg === expectedHoverBg) {
-      console.log("❌ Test 7: Button hover effect not working correctly (hint: check CSS specificity rules)");
+      console.log(
+        "❌ Test 7: Button hover effect not working correctly (hint: when two rules are equally specific, the order they appear in decides which wins)"
+      );
     } else {
       console.log("✅ Test 7: Button hover effects are working");
       passedTests++;

@@ -1,48 +1,53 @@
 // ========================================
-// 🟡 SASS DEBUGGING CHALLENGE (60 minutes)
+// 🟡 SASS DEBUGGING CHALLENGE (50 minutes)
 // ========================================
 //
 // Welcome to the Yellow Submarine Adventures website!
-// This SASS file has both DIAGNOSTIC issues to fix (30 min)
-// and a QUALITATIVE improvement section (30 min).
+// This SASS file has both DIAGNOSTIC issues to fix (35 min)
+// and a QUALITATIVE improvement section (15 min).
 //
-// SETUP: The build process is already working! Just run:
-// npm run build:sass (from the main directory)
+// SETUP: Compile this file from the lab/ folder:
+//   npm run build:sass    (compile once)
+//   npm run watch:sass    (recompile every time you save, Ctrl+C to stop)
 //
-// The CSS will compile to css/styles.css automatically.
+// The CSS compiles to css/styles.css, which index.html loads.
+//
+// HOW TO DEBUG THIS FILE:
+// - Seven of the issues stop the compiler. Sass reports the FIRST error it
+//   finds with a file, line and column. Fix it, compile again, repeat.
+//   Sometimes the error points at the line just after the real mistake.
+// - Three issues (#5, #6, #8) compile without errors but look wrong in the
+//   browser. You can only see them once the file compiles, so fix the compile
+//   errors first. Then inspect them in DevTools and compare the compiled CSS
+//   with what you meant.
+// - Each issue below describes what goes wrong, not how to fix it.
+// - Stuck on an issue for more than 5 minutes? Open ../../hints.md for a nudge.
 //
 // ========================================
 
-// ========== DIAGNOSTIC SECTION (30 minutes) ==========
+@use 'sass:color';
+
+// ========== DIAGNOSTIC SECTION (35 minutes) ==========
 // Find and fix 10 SASS issues below
 
-// 🔧 DIAGNOSTIC ISSUE #1: Wrong variable syntax
-// PROBLEM: SASS variables should start with $ not -
-// FIX: Change -primary-yellow to $primary-yellow
+// 🔧 DIAGNOSTIC ISSUE #1: Broken palette
+// SYMPTOM: The compiler stops before it gets past the first line of the palette.
+// The other four colors are declared correctly. What's different about the first one?
 -primary-yellow: #FFD700;
 $submarine-blue: #1E3A8A;
 $ocean-green: #059669;
 $coral-pink: #F472B6;
 $deep-purple: #7C3AED;
 
-// 🔧 DIAGNOSTIC ISSUE #2: Invalid nesting
-// PROBLEM: You can't nest media queries inside selectors like this
-// FIX: Move the media query outside the selector or restructure
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1rem;
-
-    @media (max-width: 768px) {
-        .nested-class {
-            display: none;
-        }
-    }
 }
 
-// 🔧 DIAGNOSTIC ISSUE #3: Missing semicolon in mixin
-// PROBLEM: SASS mixins need semicolons after each property
-// FIX: Add semicolon after "border-radius: 8px"
+// 🔧 DIAGNOSTIC ISSUE #2: Mixin won't compile
+// SYMPTOM: The compiler reports an error inside this mixin. The line it
+// points at may look fine on its own, so check the line above it too.
 @mixin card-style {
     background: white;
     border-radius: 8px
@@ -50,9 +55,15 @@ $deep-purple: #7C3AED;
     padding: 1.5rem;
 }
 
-// 🔧 DIAGNOSTIC ISSUE #4: Wrong mixin usage
-// PROBLEM: Using @include wrong - should be @include not @mixin
-// FIX: Change @mixin to @include
+// Shared outline for the submarine's parts (used with @extend in issue #9)
+%submarine-part {
+    border: 3px solid $submarine-blue;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+}
+
+// 🔧 DIAGNOSTIC ISSUE #3: Voyage cards don't get their card styles
+// SYMPTOM: The voyage cards should pick up the card-style mixin above, but the
+// compiler rejects this line. Defining a mixin and using one are different at-rules.
 .voyage-card {
     @mixin card-style;
     transition: transform 0.3s ease;
@@ -62,9 +73,9 @@ $deep-purple: #7C3AED;
     }
 }
 
-// 🔧 DIAGNOSTIC ISSUE #5: Undefined variable
-// PROBLEM: Using $underfined--color that doesn't exist
-// FIX: Use one of the defined color variables like $submarine-blue
+// 🔧 DIAGNOSTIC ISSUE #4: Header color
+// SYMPTOM: The compiler can't find the variable used for the header background.
+// The header should use the submarine blue from the palette.
 .main-header {
     background: $underfined-color;
     color: white;
@@ -95,9 +106,10 @@ $deep-purple: #7C3AED;
         border-radius: 4px;
         transition: background-color 0.2s;
 
-        // 🔧 DIAGNOSTIC ISSUE #6: Wrong ampersand usage
-        // PROBLEM: &--hover should be &:hover for pseudo-classes
-        // FIX: Change &--hover to &:hover
+        // 🔧 DIAGNOSTIC ISSUE #5: Nav links ignore the mouse
+        // SYMPTOM: This compiles, but hovering a nav link does nothing. Look in
+        // css/styles.css for the selector this block produced. Does anything in
+        // the HTML have that class?
         &-hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
@@ -110,21 +122,16 @@ $deep-purple: #7C3AED;
     padding: 4rem 0;
     text-align: center;
 
+    // 🔧 DIAGNOSTIC ISSUE #6: Hero title too big on phones
+    // SYMPTOM: The "Responsive design" block at the bottom of this file shrinks
+    // .hero-title to 2rem on screens up to 768px wide, but on a phone the title
+    // stays at 3rem. Inspect it in DevTools at phone width: the 2rem rule is
+    // crossed out. Why does the 3rem rule win? (Think about what nesting adds
+    // to the compiled selector.)
     .hero-title {
         font-size: 3rem;
         color: $submarine-blue;
         margin-bottom: 1rem;
-
-        // 🔧 DIAGNOSTIC ISSUE #7: Invalid selector nesting
-        // PROBLEM: You can't nest regular CSS selectors with & like this
-        // FIX: Remove the & or restructure the nesting properly
-        & + p.subtitle {
-            & + div {
-                & span {
-                    color: red;
-                }
-            }
-        }
     }
 
     .hero-description {
@@ -135,9 +142,10 @@ $deep-purple: #7C3AED;
     }
 }
 
-// 🔧 DIAGNOSTIC ISSUE #8: Wrong function syntax
-// PROBLEM: SASS functions use @function not @mixin
-// FIX: Change @mixin to @function
+// 🔧 DIAGNOSTIC ISSUE #7: Spacing helper won't compile
+// SYMPTOM: calculate-spacing() is meant to RETURN a value that .cta-button uses
+// for its padding, but the compiler says @return isn't allowed here. Which
+// at-rule defines something that returns a value?
 @mixin calculate-spacing($base: 1rem) {
     @return $base * 1.5;
 }
@@ -152,12 +160,17 @@ $deep-purple: #7C3AED;
     cursor: pointer;
     transition: all 0.3s ease;
 
-    &.primary {
+    // 🔧 DIAGNOSTIC ISSUE #8: Invisible "Set Sail Today" button
+    // SYMPTOM: This compiles, but the button shows the browser's plain grey
+    // default style instead of submarine blue with white text. The button has BOTH classes
+    // (class="cta-button primary"). Look at the selector this produced in
+    // css/styles.css: does it match one element with two classes?
+    & .primary {
         background: $submarine-blue;
         color: white;
 
         &:hover {
-            background: darken($submarine-blue, 10%);
+            background: color.adjust($submarine-blue, $lightness: -10%);
             transform: scale(1.05);
         }
     }
@@ -177,10 +190,11 @@ $deep-purple: #7C3AED;
         border-radius: 40px;
         position: relative;
 
-        // 🔧 DIAGNOSTIC ISSUE #9: Wrong @extend syntax
-        // PROBLEM: @extend should reference a selector, not a mixin
-        // FIX: Either create a placeholder selector or use @include with mixin
-        @extend calculate-spacing;
+        // 🔧 DIAGNOSTIC ISSUE #9: Submarine outline
+        // SYMPTOM: This line should reuse the shared outline styles defined near
+        // the top of the file, but the compiler says the target selector wasn't
+        // found. Compare the name here with the name of what you're extending.
+        @extend submarine-part;
     }
 }
 
@@ -192,10 +206,10 @@ $deep-purple: #7C3AED;
     margin-top: 2rem;
 }
 
-// 🔧 DIAGNOSTIC ISSUE #10: Import statement in wrong place
-// PROBLEM: @import should be at the top of the file
-// FIX: Move this import to the top of the file
-@import 'partials/forms';
+// 🔧 DIAGNOSTIC ISSUE #10: Forms partial won't load
+// SYMPTOM: The compiler refuses to load the forms partial from here. Read the
+// error message: where in a file does Sass require @use rules to go?
+@use 'partials/forms';
 
 .voyage-features {
     list-style: none;
@@ -211,45 +225,44 @@ $deep-purple: #7C3AED;
     }
 }
 
-// ========== QUALITATIVE SECTION (30 minutes) ==========
+// ========== QUALITATIVE SECTION (15 minutes) ==========
 /*
-🎨 QUALITATIVE CHALLENGE: Yellow Submarine Theming
+🎨 QUALITATIVE CHALLENGE: Theme the buttons and titles
 
-Your mission: Make this website truly feel like a magical underwater adventure!
+Once the diagnostic issues are fixed, compile and open index.html. Some parts
+of the page still don't match the finished design
+(../assets/frameworks_fail_sass.png). Do these two tasks with the SASS tools
+you've practised this week. Your mentor reviews this part.
 
-Current issues to improve:
-- The color scheme needs more ocean/submarine theming
-- Components should be better organized with mixins and placeholders
-- Add some creative SASS features like loops or custom functions
-- Create a cohesive design system using SASS variables
-- Add submarine-themed hover effects and animations
+1. BUTTON MIXIN (about 10 min)
+   The "Book Adventure" / "Explore Garden" / "Dive Deep" buttons
+   (.voyage-button) are still plain browser buttons, and the "Send Message in
+   a Bottle" button (.form-button.secondary) is white on the white form, so you
+   can barely see it.
+   - Write ONE mixin with parameters for the background and text color, for
+     example @mixin themed-button($bg, $text) { ... }. Give it the shared
+     button styles: padding, rounded corners, no border, bold text, a pointer
+     cursor, and a hover state that uses color.adjust() to darken $bg.
+   - @include it in .voyage-button and in .form-button.secondary, using colors
+     from the palette at the top of the file.
+   Done when: all four kinds of button look themed and readable, and their
+   shared styles are written once, in the mixin.
 
-Goals for this section:
-1. REORGANIZE: Break the code into logical sections with clear comments
-2. IMPROVE COLORS: Create a cohesive underwater/submarine color palette
-3. ADD MIXINS: Create reusable mixins for common patterns
-4. FIX BUTTONS: Notice that some of the buttons are not themed or aren't showing up very well?
-5. ENHANCE INTERACTIONS: Add submarine-themed hover effects
-6. CREATIVE FEATURES: Use SASS loops, functions, or advanced features
-7. EXTRA CHALLENGE: Can you make the submarine look a bit more like a submarine?
+2. SECTION TITLES (about 5 min)
+   The .section-title headings ("Our Magical Voyages", "Meet Our Submarine
+   Crew", "Join Our Next Adventure") are unstyled. Add one .section-title rule
+   that centers them, sizes them up, and colors them with a palette variable.
+   Done when: the titles look like the screenshot (the one on the dark booking
+   section can stay left-aligned and use a light color: nest a rule for it).
 
-Reference the mockup: ../assets/yellow-submarine-mockup.png
-
-Self-reflection questions:
-- Does the site feel like an underwater adventure?
-- Are the SASS features being used effectively?
-- Is the code well-organized and maintainable?
-- Do the interactions feel magical and engaging?
-- Would other developers find this code easy to understand?
-
-Time estimate: 30 minutes
-Focus on: SASS organization, theming, and creative effects
+Already done early? Style .submarine-periscope and .submarine-propeller with
+@extend %submarine-part. It's optional and isn't graded.
 */
 
 // TODO: Improve the crew section styling
 .crew-section {
     padding: 4rem 0;
-    background: lighten($ocean-green, 40%);
+    background: color.adjust($ocean-green, $lightness: 40%);
 }
 
 .crew-grid {
@@ -352,7 +365,7 @@ Focus on: SASS organization, theming, and creative effects
         color: $submarine-blue;
 
         &:hover {
-            background: darken($primary-yellow, 10%);
+            background: color.adjust($primary-yellow, $lightness: -10%);
             transform: translateY(-2px);
         }
     }
@@ -371,7 +384,7 @@ Focus on: SASS organization, theming, and creative effects
 
 // Footer
 .main-footer {
-    background: darken($submarine-blue, 10%);
+    background: color.adjust($submarine-blue, $lightness: -10%);
     color: white;
     padding: 3rem 0 1rem;
 
@@ -439,20 +452,16 @@ Focus on: SASS organization, theming, and creative effects
 🎉 DIAGNOSTIC CHECKLIST - Are you done?
 ========================================
 
-Before moving to the qualitative section, fix these issues:
-✅ Issue #1: -primary-yellow → $primary-yellow
-✅ Issue #2: Fix invalid media query nesting
-✅ Issue #3: Add missing semicolon in mixin
-✅ Issue #4: @mixin → @include for mixin usage
-✅ Issue #5: Fix undefined variable $underfined--color
-✅ Issue #6: &--hover → &:hover
-✅ Issue #7: Fix invalid selector nesting
-✅ Issue #8: @mixin → @function for function
-✅ Issue #9: Fix @extend usage
-✅ Issue #10: Move @import to top of file
+Before moving to the qualitative section, check:
+[ ] npm run build:sass finishes with no errors (issues #1-#4, #7, #9, #10)
+[ ] The header has a blue background (#4)
+[ ] The voyage cards are white cards with a shadow (#2, #3)
+[ ] Hovering a nav link highlights it (#5)
+[ ] At phone width (DevTools device toolbar) the hero title is smaller (#6)
+[ ] "Set Sail Today" is a blue button with white text (#8)
+[ ] The submarine body has a blue outline (#9)
 
-Run: npm run build:sass (from main directory)
-Test: cd .. && npm run test:sass
+Test (from lab/): npm run test:sass
 
 Then work on the qualitative improvements!
 ========================================

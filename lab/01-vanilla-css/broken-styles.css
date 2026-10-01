@@ -4,9 +4,10 @@
 This file has TWO main sections:
 
 🔧 DIAGNOSTIC SECTION (30 minutes) - 10 issues to find and fix
-🎨 QUALITATIVE SECTION (30 minutes) - Layout improvement challenge
+🎨 QUALITATIVE SECTION (15 minutes) - 3 focused improvements to the volunteer section
 
 Work through the diagnostic fixes first, then move to the qualitative challenge.
+Stuck on an issue for more than 5 minutes? Open ../hints.md for a nudge.
 */
 
 /* ========== DIAGNOSTIC SECTION (30 minutes) ========== */
@@ -41,8 +42,8 @@ body {
 }
 
 /* 🔧 DIAGNOSTIC ISSUE #2: Navigation alignment
-   The navigation links should be spread horizontally across the header,
-   but they're stacking vertically instead. Check the flexbox properties. */
+   The navigation links should be centered across the header, but they're
+   bunched up on the left. Check the flexbox properties. */
 .main-nav {
   display: flex;
   justify-items: center;
@@ -120,7 +121,8 @@ body {
 
 /* 🔧 DIAGNOSTIC ISSUE #7: Button hover effect
    The harvest buttons should turn a darker green when hovered,
-   but it's turning red. There's a specificity conflict here. */
+   but it's turning red. Two rules are competing for the same element:
+   when selectors are equally specific, which one wins? */
 .harvest-btn:hover {
   background-color: #48bb78;
 }
@@ -162,27 +164,38 @@ body {
   margin-top: 1rem;
 }
 
-/* ========== QUALITATIVE SECTION (30 minutes) ========== */
+/* ========== QUALITATIVE SECTION (15 minutes) ========== */
 /*
 🎨 QUALITATIVE CHALLENGE: Volunteer Section Improvement
 
-Your task: Make the volunteer registration section match the mockup screenshot
-(see main README). The section should feel professional, welcoming, and easy to use.
+Your task: Make the volunteer registration section match the finished design
+(the "Join Our Garden Community" section of the screenshot below).
+Do these three tasks in order. Your mentor reviews this part.
 
-Current issues to address:
-- The form and info box should be displayed side by side on larger screens
-- The fake button div should be replaced with a proper, accessible button element
-- The spacing and visual hierarchy need improvement
-- The form needs better organization and visual appeal
+1. SIDE BY SIDE (about 5 min)
+   On screens 768px and wider, put the form and the "What to Expect" box next
+   to each other, with the form taking more room. On narrower screens they stack.
+   Write this in .volunteer-form-container below (grid or flexbox, plus one
+   media query).
+   Done when: resizing the window switches between stacked and side by side.
 
-Self-reflection questions as you work:
-- Does the form feel easy to scan and complete?
-- Are you using semantic HTML elements appropriately?
-- Does the spacing create a clear visual hierarchy?
-- How accessible is your implementation for keyboard and screen reader users?
-- Does the layout work well on both desktop and mobile?
+2. ONE REAL BUTTON (about 3 min)
+   The "Sign Me Up!" <div class="fake-button"> in index.html only works with a
+   mouse: you can't Tab to it, and screen readers don't announce it as a button.
+   The form already has a real submit button below it. Delete the fake div from
+   index.html, and delete the .fake-button rules from this file.
+   Done when: pressing Tab through the form reaches every field and then exactly
+   one button.
 
-Reference: See ../assets/volunteer-section-mockup.png for the target design
+3. INFO PANEL (about 7 min)
+   Style .volunteer-info as a panel that matches the screenshot: a light
+   background, padding, rounded corners, and a thin line between list items.
+   Done when: it looks like a card next to the form, not loose text.
+
+Already done early? Polish the spacing, but don't start anything new: the next
+section needs your time.
+
+Reference: See ../assets/frameworks_fail_vanilla.png for the target design
 */
 
 .volunteer-section {

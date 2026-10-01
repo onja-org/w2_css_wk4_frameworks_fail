@@ -1,0 +1,21 @@
+{
+  "name": "css-frameworks-debugging-lab",
+  "version": "1.0.0",
+  "description": "CSS · Week 4 · Day 5 — debug vanilla CSS, set up and debug Tailwind, and fix broken SASS",
+  "scripts": {
+    "test:vanilla": "node 01-vanilla-css/test-diagnostic.js",
+    "test:tailwind": "node 02-tailwind/test-diagnostic.js",
+    "test:sass": "node 03-sass/test-diagnostic.js",
+    "build:sass": "sass 03-sass/scss/styles.scss 03-sass/css/styles.css",
+    "watch:sass": "sass 03-sass/scss/styles.scss 03-sass/css/styles.css --watch",
+    "test:all": "npm run test:vanilla && npm run test:tailwind && npm run test:sass",
+    "test": "node tests/progress.js"
+  },
+  "dependencies": {
+    "puppeteer": "^24.15.0"
+  },
+  "devDependencies": {
+    "sass": "^1.69.0",
+    "tailwindcss": "^3.3.0"
+  }
+}

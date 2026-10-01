@@ -1,101 +1,91 @@
-# CSS Frameworks Debugging Lab
+# CSS, Week 4 — CSS Frameworks Debugging: Vanilla CSS, Tailwind and SASS
 
-**Time Estimate:** 3.5-4 hours  
-**Concepts:** CSS Fundamentals, Tailwind CSS, SASS/SCSS  
-**Focus:** Debugging, Integration, Best Practices
+**Day:** Day 5
 
-## Overview
+**Estimated time:** 3 hours (20 min lesson, then 45 + 55 + 50 min for the three sections, and 10 min to test and submit)
 
-Welcome to the CSS Frameworks Debugging Lab! This lab reinforces fundamental CSS concepts and framework-specific best practices through hands-on debugging challenges.
-
-You'll work through three distinct sections, each representing a different approach to styling web projects:
-
-1. **Vanilla CSS** (60-80 min) - Community Garden theme
-2. **Tailwind CSS** (60-80 min) - Clock Repair Shop theme  
-3. **SASS/SCSS** (60-80 min) - Yellow Submarine theme
-
-Each section contains both **diagnostic fixes** (specific broken code to debug) and **qualitative improvements** (creative enhancements to make the sites better).
-
-<img width="250px" style="vertical-align: top" src="assets/frameworks_fail_vanilla.png" alt="Vanilla CSS Debugging">
-<img width="250px" style="vertical-align: top" src="assets/frameworks_fail_tailwind.png" alt="Tailwind Debugging">
-<img width="250px" src="assets/frameworks_fail_sass.png" alt="SASS Debugging">
-
-## Learning Objectives
-
-By completing this lab, you will:
-
-- **Strengthen CSS fundamentals** through debugging real-world issues
-- **Gain familiarity** with popular CSS approaches and tools
-- **Build confidence** with command-line tools and build processes
-- **Practice problem-solving** with immediate feedback through automated tests
-- **Connect concepts** you've learned across multiple weeks
-
-## Lab Structure
-
-### Section 1: Vanilla CSS Debugging (~60 minutes)
-**Theme:** 🌱 Community Garden Website
-
-**What you'll do:**
-- Fix 10 diagnostic CSS issues (broken properties, missing units, specificity conflicts)
-- Improve the volunteer form design with qualitative enhancements
-- Practice core CSS concepts: flexbox, grid, positioning, specificity
-
-**Key Skills:**
-- CSS property names and syntax
-- Box model and layout debugging
-- Specificity and cascade understanding
+**Block:** CSS · Week 4
 
 ---
 
-### Section 2: Tailwind CSS Setup & Debugging (~60 minutes)  
-**Theme:** 🕰️ Clock Repair Shop Website
+Three websites are broken, each styled a different way. You'll debug a community garden site written in vanilla CSS, set up Tailwind from scratch for a clock repair shop and fix its broken utility classes, then get a Yellow Submarine site's SASS compiling again. Each section has diagnostic fixes checked by automated tests, followed by a creative improvement challenge.
 
-**What you'll do:**
-- **Setup Phase (30 min):** Configure Tailwind CSS build process with detailed guidance
-- **Diagnostic Phase (30 min):** Fix 10 broken Tailwind utility classes
-- Learn utility-first CSS approach through hands-on practice
+**Prerequisites:** CSS fundamentals (box model, flexbox, grid, specificity), basic command line use, and this week's SCSS labs.
 
-**Key Skills:**
-- Package management with npm
-- CSS build processes and watch commands
-- Utility-first CSS methodology
-- Command line comfort building
-  
----
+<img width="250px" style="vertical-align: top" src="lab/assets/frameworks_fail_vanilla.png" alt="Vanilla CSS Debugging">
+<img width="250px" style="vertical-align: top" src="lab/assets/frameworks_fail_tailwind.png" alt="Tailwind Debugging">
+<img width="250px" src="lab/assets/frameworks_fail_sass.png" alt="SASS Debugging">
 
-### Section 3: SASS Debugging & Organization (~60 minutes)
-**Theme:** 🟡 Yellow Submarine Adventures Website
+## How this lab works
 
-**What you'll do:**
-- Fix 10 SASS syntax and compilation issues (variables, mixins, functions, imports)
-- Improve code organization with qualitative SASS features
-- Learn CSS preprocessing benefits through practical application
+```
+w2_css_frameworks_fail/
+├── lesson/
+│   └── index.md              ← Start here. Read this first.
+├── lab/
+│   ├── instructions.md       ← Then do this. Includes a 3-hour schedule.
+│   ├── hints.md              ← Stuck for 5 minutes? One nudge per issue
+│   ├── 01-vanilla-css/       ← Section 1: Community Garden (fix broken-styles.css)
+│   ├── 02-tailwind/          ← Section 2: Clock Repair Shop (start with SETUP-INSTRUCTIONS.md)
+│   ├── 03-sass/              ← Section 3: Yellow Submarine (fix scss/styles.scss)
+│   ├── tests/                ← Combined score runner (don't edit)
+│   ├── assets/               ← Screenshots of each site
+│   ├── package.json          ← Tooling: Tailwind, Sass, tests (you add one script in the Tailwind setup)
+│   ├── .puppeteerrc.cjs      ← Test browser settings (don't edit)
+│   ├── .prettierrc
+│   └── .gitignore
+├── lab.json                  ← Submission config (don't edit)
+├── submit                    ← Run this when you're done (./submit <your-student-id>)
+├── submit.py                 ← The submission script that ./submit runs (don't edit)
+└── README.md                 ← You are here
+```
 
-**Key Skills:**
-- SASS/SCSS syntax and compilation
-- CSS organization with variables, mixins, and functions
-- Advanced CSS features and preprocessing benefits
+You need Node.js 18 or newer (`node --version`). Before you start, run `npm install` once from inside the `lab/` folder (`cd lab`). All `npm run ...` commands in the instructions are run from inside `lab/` too.
 
-## Getting Started
-
-### Quick Start
-1. Install dependencies with `npm install` (run from the root directory)
-2. Navigate to the `lab/` directory for the hands-on exercises
-3. Follow the detailed instructions in `lab/README.md`
-4. Work through each section sequentially
-
-## Learning Outcomes
-
-After completing this lab, you should feel confident:
-
-- **Debugging CSS issues** systematically and efficiently
-- **Understanding different CSS approaches** and when to use them
-- **Working with build tools** and command-line processes  
-- **Organizing CSS code** for maintainability and scalability
-- **Connecting fundamental concepts** across different tools and frameworks
+> **Note:** The lab files contain intentional errors. Fixing them is the lab.
 
 ---
 
-**Happy debugging! 🐛→✨**
+## Step 1 — Read the lesson
 
-*This lab is designed to build confidence through hands-on problem-solving while reinforcing fundamental concepts that will serve you throughout your web development journey.*
+Open `lesson/index.md` and read it fully before touching any code.
+
+The lesson explains the concept you're about to practise. Don't skip it — the lab will be much harder without it.
+
+---
+
+## Step 2 — Do the lab
+
+Open `lab/instructions.md` and work through the tasks in order.
+
+Your work goes inside the `lab/` directory. Do not modify files outside of it.
+
+---
+
+## Step 3 — Submit
+
+When all tasks are complete, run this from the project root (not from `lab/`):
+
+```bash
+./submit <your-student-id>
+```
+
+On Windows without Git Bash, run `python submit.py <your-student-id>` instead (or `python3`, depending on your install).
+
+This runs the tests for all three sections (34 checks) and records your score in Canvas. The qualitative improvements are reviewed by your mentor. You can submit multiple times — the most recent submission counts.
+
+---
+
+## Getting stuck
+
+1. Re-read the relevant section of the lesson
+2. Check the "Common mistakes" table in the lesson
+3. Search the error message — copy it exactly into Google or your AI tool
+4. Ask in the group chat — share your error message and what you've already tried
+5. Escalate to your mentor only if steps 1–4 haven't resolved it
+
+---
+
+## This week's focus
+
+> "Turn plain CSS into maintainable preprocessor code — SCSS variables, mixins and partials, a first look at LESS — and learn to diagnose and fix preprocessor mistakes."

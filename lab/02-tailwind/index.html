@@ -9,24 +9,29 @@
 <body>
     <!--
     ========================================
-    🔧 DIAGNOSTIC CHALLENGE (30 minutes)
+    🔧 DIAGNOSTIC CHALLENGE (25 minutes)
     ========================================
-    
-    After completing the SETUP section, come back here to fix 10 broken Tailwind classes!
-    
+
+    After completing the SETUP section, come back here to fix 8 class problems
+    in this file (#1-#5 and #7-#9). Issue #6 is the tailwind.config.js content
+    setting you fixed during setup.
+
     Instructions:
     - Make sure your build command is still running (npm run build:css)
-    - Find and fix the broken classes marked with comments below
-    - Save the HTML file after each fix to see changes
-    - Refresh your browser to see the updates
-    
+    - Each issue below describes what looks wrong, not how to fix it
+    - Stuck on an issue for more than 5 minutes? Open ../hints.md for a nudge
+    - Use DevTools to inspect the element: a class with no matching CSS rule
+      does nothing, and Tailwind never warns you about it
+    - Look class names up in the Tailwind docs: https://v3.tailwindcss.com/docs
+    - Save the HTML file after each fix and refresh your browser
+
     Common issues to look for:
     - Typos in class names
-    - Missing colons in responsive classes (sm:, md:, lg:)
-    - Invalid class names that don't exist in Tailwind
-    - Missing transition classes for smooth effects
-    
-    Run tests when done: cd .. && npm run test:tailwind
+    - Class names that don't exist in Tailwind
+    - Responsive prefixes written the wrong way
+    - Missing states or effects that other, similar elements already have
+
+    Run tests when done (from lab/): npm run test:tailwind
     ========================================
     -->
 
@@ -36,16 +41,17 @@
             <div class="flex items-center justify-between">
                 <h1 class="text-3xl font-bold">🕰️ Clockwork Repairs</h1>
                 <nav>
-                    <!-- 🔧 DIAGNOSTIC ISSUE #9: Navigation links need smooth transitions -->
-                    <!-- PROBLEM: The color change on hover is abrupt -->
-                    <!-- FIX: Add transition-colors class to make hover effect smoother -->
+                    <!-- 🔧 DIAGNOSTIC ISSUE #9: Abrupt hover effect -->
+                    <!-- SYMPTOM: The nav links snap to their hover color instantly. The buttons on this
+                         page fade smoothly between colors. What do the buttons have that the links don't? -->
                     <div class="flex space-x-6">
-                        <!-- 🔧 DIAGNOSTIC ISSUE #5: Poor contrast color -->
-                        <!-- PROBLEM: text-amber-200 is too light on dark background -->
-                        <!-- FIX: Try text-amber-100 for better contrast -->
-                        <a href="#services" class="hover:text-amber-200">Services</a>
-                        <a href="#about" class="hover:text-amber-200">About</a>
-                        <a href="#contact" class="hover:text-amber-200">Contact</a>
+                        <!-- 🔧 DIAGNOSTIC ISSUE #5: Hard-to-read links -->
+                        <!-- SYMPTOM: The nav links are dark text on a dark header and almost disappear.
+                             Readable text needs a contrast ratio of at least 4.5:1 with its background
+                             (check it in DevTools: inspect the link and click the color swatch). -->
+                        <a href="#services" class="text-amber-700 hover:text-amber-200">Services</a>
+                        <a href="#about" class="text-amber-700 hover:text-amber-200">About</a>
+                        <a href="#contact" class="text-amber-700 hover:text-amber-200">Contact</a>
                     </div>
                 </nav>
             </div>
@@ -60,7 +66,7 @@
                     Restoring Time, One Tick at a Time
                 </h2>
                 <p class="text-xl text-amber-800 mb-8 max-w-2xl mx-auto">
-                    Expert clock restoration and repair services. From antique grandfather clocks 
+                    Expert clock restoration and repair services. From antique grandfather clocks
                     to modern timepieces, we bring precision back to your precious instruments.
                 </p>
                 <button class="bg-amber-700 hover:bg-amber-800 text-white font-semibold py-3 px-8 rounded-lg transition-colors">
@@ -70,20 +76,20 @@
         </section>
 
         <!-- DIAGNOSTIC SECTION - Fix broken utility classes below -->
-        
+
         <!-- Services Section -->
         <section id="services" class="py-16 bg-white">
             <div class="max-w-6xl mx-auto px-4">
                 <h2 class="text-4xl font-bold text-center text-amber-900 mb-12">Our Services</h2>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <!-- Service 1 - Has broken classes -->
-                    <!-- 🔧 DIAGNOSTIC ISSUE #1: Invalid shadow class -->
-                    <!-- PROBLEM: shadow-medium doesn't exist in Tailwind -->
-                    <!-- FIX: Use shadow-md (medium shadow) -->
-                    <!-- 🔧 DIAGNOSTIC ISSUE #2: Invalid hover shadow class -->
-                    <!-- PROBLEM: shadow-large doesn't exist in Tailwind -->
-                    <!-- FIX: Use shadow-lg (large shadow) -->
+                    <!-- 🔧 DIAGNOSTIC ISSUE #1: Missing shadow -->
+                    <!-- SYMPTOM: This card sits flat on the page while the other two have a shadow.
+                         Compare its classes with the cards next to it. -->
+                    <!-- 🔧 DIAGNOSTIC ISSUE #2: No hover effect -->
+                    <!-- SYMPTOM: The other cards lift with a bigger shadow when you hover over them.
+                         This one doesn't change at all. -->
                     <div class="bg-amber-50 p-6 rounded-xl shadow-medium hover:shadow-large transition-shadow">
                         <div class="text-4xl mb-4">⚙️</div>
                         <h3 class="text-2xl font-semibold text-amber-900 mb-3">Mechanical Repair</h3>
@@ -122,9 +128,9 @@
                                 <span class="w-2 h-2 bg-amber-500 rounded-full mr-3"></span>
                                 Metal polishing
                             </li>
-                            <!-- 🔧 DIAGNOSTIC ISSUE #3: British spelling -->
-                            <!-- PROBLEM: items-centre uses British spelling -->
-                            <!-- FIX: Change to items-center (American spelling) -->
+                            <!-- 🔧 DIAGNOSTIC ISSUE #3: Misaligned bullet -->
+                            <!-- SYMPTOM: In this list item the dot sits at the top instead of lining up
+                                 with the middle of the text like the items above it. -->
                             <li class="flex items-centre">
                                 <span class="w-2 h-2 bg-amber-500 rounded-full mr-3"></span>
                                 Glass replacement
@@ -162,27 +168,27 @@
         <section class="py-16 bg-amber-50">
             <div class="max-w-4xl mx-auto px-4">
                 <h2 class="text-4xl font-bold text-center text-amber-900 mb-8">Request a Repair</h2>
-                
+
                 <form class="bg-white p-8 rounded-xl shadow-lg">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label for="name" class="block text-amber-900 font-medium mb-2">Your Name</label>
-                            <input type="text" id="name" name="name" 
+                            <input type="text" id="name" name="name"
                                    class="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
                         </div>
                         <div>
                             <label for="email" class="block text-amber-900 font-medium mb-2">Email Address</label>
-                            <input type="email" id="email" name="email" 
+                            <input type="email" id="email" name="email"
                                    class="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
                         </div>
                     </div>
-                    
+
                     <div class="mb-6">
                         <label for="clock-type" class="block text-amber-900 font-medium mb-2">Type of Clock</label>
-                        <!-- 🔧 DIAGNOSTIC ISSUE #7: Missing focus states -->
-                        <!-- PROBLEM: Select dropdown is missing focus styles that inputs have -->
-                        <!-- FIX: Add focus:ring-2 focus:ring-amber-500 focus:border-amber-500 classes -->
-                        <select id="clock-type" name="clock-type" 
+                        <!-- 🔧 DIAGNOSTIC ISSUE #7: No focus highlight -->
+                        <!-- SYMPTOM: Press Tab through the form. Every field gets an amber ring when it's
+                             focused, except this dropdown. Keyboard users can't see where they are. -->
+                        <select id="clock-type" name="clock-type"
                                 class="w-full px-4 py-3 border border-amber-200 rounded-lg">
                             <option value="">Select clock type</option>
                             <option value="grandfather">Grandfather Clock</option>
@@ -192,26 +198,26 @@
                             <option value="other">Other</option>
                         </select>
                     </div>
-                    
+
                     <div class="mb-6">
                         <label for="issue" class="block text-amber-900 font-medium mb-2">Describe the Issue</label>
-                        <textarea id="issue" name="issue" rows="4" 
+                        <textarea id="issue" name="issue" rows="4"
                                   class="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                   placeholder="Tell us what's wrong with your timepiece..."></textarea>
                     </div>
-                    
-                    <!-- 🔧 DIAGNOSTIC ISSUE #4: Missing colon in responsive class -->
-                    <!-- PROBLEM: sm-flex-row is missing the colon separator -->
-                    <!-- FIX: Change to sm:flex-row -->
+
+                    <!-- 🔧 DIAGNOSTIC ISSUE #4: Buttons never sit side by side -->
+                    <!-- SYMPTOM: The two buttons should stack on phones and sit in a row on wider screens
+                         (640px and up), but they stay stacked at every width. Resize the window to check. -->
                     <div class="flex flex-col sm-flex-row gap-4">
-                        <!-- 🔧 DIAGNOSTIC ISSUE #8: Inconsistent button styling -->
-                        <!-- PROBLEM: Buttons might not have consistent padding -->
-                        <!-- FIX: Make sure both buttons use the same py-3 px-6 classes -->
-                        <button type="submit" 
+                        <!-- 🔧 DIAGNOSTIC ISSUE #8: Mismatched buttons -->
+                        <!-- SYMPTOM: Side by side, these two buttons don't look like a matching pair.
+                             Their text sits at different distances from the edges. -->
+                        <button type="submit"
                                 class="flex-1 bg-amber-700 hover:bg-amber-800 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
                             Submit Request
                         </button>
-                        <button type="button" 
+                        <button type="button"
                                 class="flex-1 bg-amber-200 hover:bg-amber-300 text-amber-900 font-semibold py-2 px-4 rounded-lg transition-colors">
                             Call Instead: (555) 123-TIME
                         </button>
@@ -267,21 +273,19 @@
     ========================================
     🎉 DIAGNOSTIC CHECKLIST - Are you done?
     ========================================
-    
-    Before running tests, make sure you fixed:
-    ✅ Issue #1: shadow-medium → shadow-md
-    ✅ Issue #2: shadow-large → shadow-lg  
-    ✅ Issue #3: items-centre → items-center
-    ✅ Issue #4: sm-flex-row → sm:flex-row
-    ✅ Issue #5: text-amber-200 → text-amber-100 (better contrast)
-    ✅ Issue #7: Added focus states to select dropdown
-    ✅ Issue #8: Made button padding consistent (py-3 px-6 for both)
-    ✅ Issue #9: Added transition-colors to navigation links
-    
-    Also check your tailwind.config.js:
-    ✅ Issue #6: content: ["./*.html"] is properly set
-    
-    Run tests: cd .. && npm run test:tailwind
+
+    Check each of these in the browser before running the tests:
+    [ ] #1  All three service cards have a shadow
+    [ ] #2  All three cards get a bigger shadow on hover
+    [ ] #3  Every bullet dot lines up with the middle of its text
+    [ ] #4  The form buttons sit side by side on a wide window and stack on a narrow one
+    [ ] #5  The nav links are easy to read on the dark header
+    [ ] #6  tailwind.config.js tells Tailwind which files to scan (setup step 4)
+    [ ] #7  Every form field shows an amber ring when you Tab into it
+    [ ] #8  The two form buttons look like a matching pair
+    [ ] #9  The nav links fade to their hover color instead of snapping
+
+    Run tests (from lab/): npm run test:tailwind
     ========================================
     -->
 </body>

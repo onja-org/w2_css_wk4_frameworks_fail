@@ -1,214 +1,295 @@
 const puppeteer = require("puppeteer");
 const path = require("path");
 const fs = require("fs");
+const os = require("os");
+const { spawnSync } = require("child_process");
+
+const HTML_PATH = path.resolve(__dirname, "index.html");
+const TAILWIND_CLI = path.resolve(__dirname, "..", "node_modules", "tailwindcss", "lib", "cli.js");
+
+// Builds Tailwind from the current index.html with a known-good config, so the
+// diagnostic checks grade your classes, not whether your watch command is running.
+function buildFreshCss() {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "tailwind-check-"));
+  const input = path.join(tmp, "input.css");
+  const config = path.join(tmp, "tailwind.config.js");
+  const output = path.join(tmp, "output.css");
+  fs.writeFileSync(input, "@tailwind base;\n@tailwind components;\n@tailwind utilities;\n");
+  fs.writeFileSync(config, `module.exports = { content: [${JSON.stringify(HTML_PATH)}] };\n`);
+  spawnSync(process.execPath, [TAILWIND_CLI, "-c", config, "-i", input, "-o", output], {
+    cwd: tmp,
+    stdio: "ignore",
+    input: "",
+  });
+  const css = fs.existsSync(output) ? fs.readFileSync(output, "utf8") : "";
+  fs.rmSync(tmp, { recursive: true, force: true });
+  return css;
+}
+
+// WCAG contrast ratio between two "rgb(r, g, b)" strings
+function contrastRatio(a, b) {
+  const luminance = rgb => {
+    const [r, g, bl] = rgb
+      .match(/\d+(\.\d+)?/g)
+      .slice(0, 3)
+      .map(v => {
+        const c = Number(v) / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+  };
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
 
 async function runTailwindTests() {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({ headless: "shell", args: ["--no-sandbox", "--disable-setuid-sandbox"] });
   const page = await browser.newPage();
-
-  // Load the local HTML file
-  const htmlPath = `file://${path.resolve(__dirname, "index.html")}`;
-  await page.goto(htmlPath);
+  await page.setViewport({ width: 1024, height: 800 });
 
   console.log("🕰️ TAILWIND CSS DIAGNOSTIC TESTS");
   console.log("=================================\n");
 
   let passedTests = 0;
-  let totalTests = 9;
+  let totalTests = 13;
 
-  // Test 1: Check if Tailwind CSS is loaded and working
-  try {
-    const tailwindLoaded = await page.evaluate(() => {
-      const header = document.querySelector("header");
-      const styles = window.getComputedStyle(header);
-      // Check if Tailwind's amber-900 background is applied
-      const bgColor = styles.backgroundColor;
-      // rgb(120, 53, 15) is approximately amber-900
-      return bgColor.includes("120") || bgColor.includes("53") || bgColor.includes("amber");
-    });
+  const pass = msg => {
+    console.log(`✅ ${msg}`);
+    passedTests++;
+  };
+  const fail = msg => console.log(`❌ ${msg}`);
 
-    if (!tailwindLoaded) {
-      console.log("❌ Test 1: Tailwind CSS not loaded properly (hint: check your CSS link and build process)");
-    } else {
-      console.log("✅ Test 1: Tailwind CSS is loaded and working");
-      passedTests++;
-    }
-  } catch (error) {
-    console.log("❌ Test 1: Error checking Tailwind CSS loading");
-  }
+  console.log("SETUP\n");
 
-  // Test 2: Check for valid shadow classes
-  try {
-    const validShadows = await page.evaluate(() => {
-      const serviceCards = document.querySelectorAll(".bg-amber-50");
-      let allValid = true;
-
-      serviceCards.forEach(card => {
-        const classes = card.className;
-        // Check for invalid shadow classes
-        if (classes.includes("shadow-medium") || classes.includes("shadow-large")) {
-          allValid = false;
-        }
-      });
-
-      return allValid;
-    });
-
-    if (!validShadows) {
-      console.log("❌ Test 2: Invalid shadow classes found (hint: Tailwind uses standard sizes like sm, md, lg, xl)");
-    } else {
-      console.log("✅ Test 2: All shadow classes are valid");
-      passedTests++;
-    }
-  } catch (error) {
-    console.log("❌ Test 2: Error checking shadow classes");
-  }
-
-  // Test 3: Check for correct spelling in flexbox classes
-  try {
-    const htmlContent = fs.readFileSync(path.resolve(__dirname, "index.html"), "utf8");
-    const hasCorrectSpelling = !htmlContent.includes("items-centre");
-
-    if (!hasCorrectSpelling) {
-      console.log("❌ Test 3: Found British spelling in class names (hint: Tailwind uses American spelling)");
-    } else {
-      console.log("✅ Test 3: All class names use correct spelling");
-      passedTests++;
-    }
-  } catch (error) {
-    console.log("❌ Test 3: Error checking class spelling");
-  }
-
-  // Test 4: Check for proper responsive class syntax
-  try {
-    const htmlContent = fs.readFileSync(path.resolve(__dirname, "index.html"), "utf8");
-    const hasCorrectSyntax = !htmlContent.includes("sm-flex-row");
-
-    if (!hasCorrectSyntax) {
-      console.log("❌ Test 4: Incorrect responsive class syntax (hint: use colons like sm:flex-row)");
-    } else {
-      console.log("✅ Test 4: Responsive classes use correct syntax");
-      passedTests++;
-    }
-  } catch (error) {
-    console.log("❌ Test 4: Error checking responsive syntax");
-  }
-
-  // Test 5: Check for actual broken classes in HTML
-  try {
-    const htmlContent = fs.readFileSync(path.resolve(__dirname, "index.html"), "utf8");
-    const hasBrokenClasses =
-      htmlContent.includes("shadow-medium") ||
-      htmlContent.includes("shadow-large") ||
-      htmlContent.includes("items-centre") ||
-      htmlContent.includes("sm-flex-row");
-
-    if (hasBrokenClasses) {
-      console.log("❌ Test 5: Found broken Tailwind classes in HTML (hint: check for typos and invalid class names)");
-    } else {
-      console.log("✅ Test 5: No broken Tailwind classes found");
-      passedTests++;
-    }
-  } catch (error) {
-    console.log("❌ Test 5: Error checking for broken classes");
-  }
-
-  // Test 6: Check if form elements have consistent focus states
-  try {
-    const consistentFocus = await page.evaluate(() => {
-      const inputs = document.querySelectorAll("input, select, textarea");
-      let allHaveFocus = true;
-
-      inputs.forEach(input => {
-        const classes = input.className;
-        if (!classes.includes("focus:ring") || !classes.includes("focus:border")) {
-          allHaveFocus = false;
-        }
-      });
-
-      return allHaveFocus;
-    });
-
-    if (!consistentFocus) {
-      console.log(
-        "❌ Test 6: Form elements missing consistent focus states (hint: add focus:ring and focus:border classes)"
-      );
-    } else {
-      console.log("✅ Test 6: All form elements have proper focus states");
-      passedTests++;
-    }
-  } catch (error) {
-    console.log("❌ Test 6: Error checking focus states");
-  }
-
-  // Test 7: Check if Tailwind config file exists and is configured
+  // Test 1: Tailwind config scans the HTML (issue #6)
   try {
     const configPath = path.resolve(__dirname, "tailwind.config.js");
-    const configExists = fs.existsSync(configPath);
+    const configContent = fs.existsSync(configPath) ? fs.readFileSync(configPath, "utf8") : "";
+    const configValid =
+      configContent.includes("content:") && configContent.includes(".html") && !configContent.includes("content: []");
 
-    let configValid = false;
-    if (configExists) {
-      const configContent = fs.readFileSync(configPath, "utf8");
-      // Check if content array is properly configured
-      configValid =
-        configContent.includes("content:") && configContent.includes(".html") && !configContent.includes("content: []");
-    }
-
-    if (!configExists || !configValid) {
-      console.log("❌ Test 7: Tailwind config missing or incorrectly configured (hint: check content array)");
+    if (configValid) {
+      pass("Test 1: tailwind.config.js tells Tailwind to scan your HTML (issue #6)");
     } else {
-      console.log("✅ Test 7: Tailwind config file properly set up");
-      passedTests++;
+      fail("Test 1: tailwind.config.js missing or its content array is empty (hint: setup step 4)");
     }
   } catch (error) {
-    console.log("❌ Test 7: Error checking config file");
+    fail("Test 1: Error checking tailwind.config.js");
   }
 
-  // Test 8: Check if CSS output file exists and has content
+  // Test 2: Input file has the three Tailwind directives
+  try {
+    const inputPath = path.resolve(__dirname, "src", "input.css");
+    const inputContent = fs.existsSync(inputPath) ? fs.readFileSync(inputPath, "utf8") : "";
+    const hasDirectives = ["base", "components", "utilities"].every(layer =>
+      new RegExp(`@tailwind\\s+${layer}\\s*;`).test(inputContent)
+    );
+
+    if (hasDirectives) {
+      pass("Test 2: src/input.css has the three @tailwind directives");
+    } else {
+      fail("Test 2: src/input.css missing or incomplete (hint: setup step 5)");
+    }
+  } catch (error) {
+    fail("Test 2: Error checking src/input.css");
+  }
+
+  // Test 3: CSS output file exists and has content
   try {
     const cssPath = path.resolve(__dirname, "dist/output.css");
-    const cssExists = fs.existsSync(cssPath);
+    const cssContent = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
 
-    let cssValid = false;
-    if (cssExists) {
-      const cssContent = fs.readFileSync(cssPath, "utf8");
-      // Check if CSS file has substantial content (Tailwind generates lots of CSS)
-      cssValid = cssContent.length > 10000 && cssContent.includes(".bg-amber");
-    }
-
-    if (!cssExists || !cssValid) {
-      console.log("❌ Test 8: CSS output file missing or empty (hint: run npm run build:css)");
+    if (cssContent.length > 10000 && cssContent.includes(".bg-amber")) {
+      pass("Test 3: dist/output.css has been generated");
     } else {
-      console.log("✅ Test 8: CSS file properly generated");
-      passedTests++;
+      fail("Test 3: dist/output.css missing or empty (hint: run npm run build:css from lab/)");
     }
   } catch (error) {
-    console.log("❌ Test 8: Error checking CSS output file");
+    fail("Test 3: Error checking dist/output.css");
   }
 
-  // Test 9: Check if package.json has correct build script
+  // Test 4: lab/package.json has the build:css script added during setup
   try {
-    const packagePath = path.resolve(__dirname, "package.json");
-    const packageExists = fs.existsSync(packagePath);
+    const packagePath = path.resolve(__dirname, "..", "package.json");
+    const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf8"));
+    const script = packageJson.scripts && packageJson.scripts["build:css"];
 
-    let scriptValid = false;
-    if (packageExists) {
-      const packageContent = fs.readFileSync(packagePath, "utf8");
-      const packageJson = JSON.parse(packageContent);
-      scriptValid =
-        packageJson.scripts &&
-        packageJson.scripts["build:css"] &&
-        packageJson.scripts["build:css"].includes("tailwindcss");
-    }
-
-    if (!packageExists || !scriptValid) {
-      console.log("❌ Test 9: Package.json missing or build script incorrect (hint: check build:css script)");
+    if (script && script.includes("tailwindcss")) {
+      pass("Test 4: lab/package.json has a build:css script");
     } else {
-      console.log("✅ Test 9: Package.json properly configured");
-      passedTests++;
+      fail("Test 4: No build:css script in lab/package.json (hint: setup step 7)");
     }
   } catch (error) {
-    console.log("❌ Test 9: Error checking package.json");
+    fail("Test 4: Error checking lab/package.json");
+  }
+
+  // Test 5: index.html loads the compiled CSS
+  try {
+    await page.goto(`file://${HTML_PATH}`);
+    const headerBg = await page.evaluate(
+      () => window.getComputedStyle(document.querySelector("header")).backgroundColor
+    );
+
+    if (headerBg === "rgb(120, 53, 15)") {
+      pass("Test 5: index.html loads your compiled Tailwind CSS");
+    } else {
+      fail("Test 5: Tailwind styles aren't showing on the page (hint: setup steps 6 and 8, link dist/output.css)");
+    }
+  } catch (error) {
+    fail("Test 5: Error checking the CSS link");
+  }
+
+  console.log("\nDIAGNOSTIC (graded against a fresh build of your index.html)\n");
+
+  const freshCss = buildFreshCss();
+  if (!freshCss) {
+    fail("Could not build Tailwind CSS from index.html, so the diagnostic checks below can't run");
+  }
+  await page.goto(`file://${HTML_PATH}`);
+  await page.evaluate(() => document.querySelectorAll('link[rel="stylesheet"]').forEach(link => link.remove()));
+  await page.addStyleTag({ content: freshCss });
+
+  const serviceCards = "#services .grid > div";
+
+  // Test 6: Every service card has a resting shadow (issue #1)
+  try {
+    const allHaveShadow = await page.$$eval(serviceCards, cards =>
+      cards.every(card => window.getComputedStyle(card).boxShadow !== "none")
+    );
+
+    if (allHaveShadow) {
+      pass("Test 6: All service cards have a shadow (issue #1)");
+    } else {
+      fail("Test 6: A service card has no shadow (hint: is its shadow class one Tailwind actually has?)");
+    }
+  } catch (error) {
+    fail("Test 6: Error checking card shadows");
+  }
+
+  // Test 7: Every service card gets a bigger shadow on hover (issue #2)
+  try {
+    const cards = await page.$$(serviceCards);
+    let allChange = cards.length > 0;
+    for (const card of cards) {
+      const before = await card.evaluate(el => window.getComputedStyle(el).boxShadow);
+      await card.hover();
+      await new Promise(resolve => setTimeout(resolve, 300)); // let the shadow transition finish
+      const after = await card.evaluate(el => window.getComputedStyle(el).boxShadow);
+      if (after === "none" || after === before) allChange = false;
+    }
+    await page.mouse.move(0, 0);
+
+    if (allChange) {
+      pass("Test 7: All service cards change shadow on hover (issue #2)");
+    } else {
+      fail("Test 7: A service card doesn't change on hover (hint: check its hover: class name)");
+    }
+  } catch (error) {
+    fail("Test 7: Error checking hover shadows");
+  }
+
+  // Test 8: Every bullet row is vertically centered (issue #3)
+  try {
+    const allCentered = await page.$$eval("#services li", items =>
+      items.every(li => window.getComputedStyle(li).alignItems === "center")
+    );
+
+    if (allCentered) {
+      pass("Test 8: All list bullets line up with their text (issue #3)");
+    } else {
+      fail("Test 8: A list bullet isn't vertically centered (hint: compare its classes with the rows that work)");
+    }
+  } catch (error) {
+    fail("Test 8: Error checking list alignment");
+  }
+
+  // Test 9: Form buttons sit in a row at 640px and wider (issue #4)
+  try {
+    const direction = await page.$eval(
+      'form button[type="submit"]',
+      button => window.getComputedStyle(button.parentElement).flexDirection
+    );
+
+    if (direction === "row") {
+      pass("Test 9: Form buttons sit side by side on wider screens (issue #4)");
+    } else {
+      fail("Test 9: Form buttons still stack on a wide screen (hint: how does Tailwind write a responsive prefix?)");
+    }
+  } catch (error) {
+    fail("Test 9: Error checking the button row");
+  }
+
+  // Test 10: Nav links are readable against the header (issue #5)
+  try {
+    const colors = await page.evaluate(() => ({
+      header: window.getComputedStyle(document.querySelector("header")).backgroundColor,
+      links: [...document.querySelectorAll("header nav a")].map(a => window.getComputedStyle(a).color),
+    }));
+    const lowest = Math.min(...colors.links.map(color => contrastRatio(color, colors.header)));
+
+    if (colors.links.length > 0 && lowest >= 4.5) {
+      pass(`Test 10: Nav links are readable on the header (contrast ${lowest.toFixed(1)}:1) (issue #5)`);
+    } else {
+      fail(`Test 10: Nav link contrast is only ${lowest.toFixed(1)}:1, needs at least 4.5:1 (hint: lighter text)`);
+    }
+  } catch (error) {
+    fail("Test 10: Error checking nav link contrast");
+  }
+
+  // Test 11: Every form field shows a focus ring (issue #7)
+  try {
+    const fields = await page.$$("form input, form select, form textarea");
+    let allRing = fields.length > 0;
+    for (const field of fields) {
+      await field.focus();
+      const shadow = await field.evaluate(el => window.getComputedStyle(el).boxShadow);
+      if (shadow === "none") allRing = false;
+    }
+
+    if (allRing) {
+      pass("Test 11: Every form field shows a focus ring (issue #7)");
+    } else {
+      fail("Test 11: A form field has no focus ring (hint: compare its classes with the fields that have one)");
+    }
+  } catch (error) {
+    fail("Test 11: Error checking focus states");
+  }
+
+  // Test 12: Both form buttons use the same padding (issue #8)
+  try {
+    const paddings = await page.$$eval("form button", buttons =>
+      buttons.map(button => {
+        const s = window.getComputedStyle(button);
+        return `${s.paddingTop} ${s.paddingRight} ${s.paddingBottom} ${s.paddingLeft}`;
+      })
+    );
+
+    if (paddings.length === 2 && paddings[0] === paddings[1]) {
+      pass("Test 12: The form buttons have matching padding (issue #8)");
+    } else {
+      fail("Test 12: The form buttons have different padding (hint: compare their py- and px- classes)");
+    }
+  } catch (error) {
+    fail("Test 12: Error checking button padding");
+  }
+
+  // Test 13: Nav links fade their color on hover (issue #9)
+  try {
+    const allTransition = await page.$$eval("header nav a", links =>
+      links.every(a => {
+        const s = window.getComputedStyle(a);
+        const animatesColor = s.transitionProperty.includes("color") || s.transitionProperty === "all";
+        return animatesColor && parseFloat(s.transitionDuration) > 0;
+      })
+    );
+
+    if (allTransition) {
+      pass("Test 13: Nav links fade smoothly on hover (issue #9)");
+    } else {
+      fail("Test 13: Nav links snap to their hover color (hint: look at the classes on the page's buttons)");
+    }
+  } catch (error) {
+    fail("Test 13: Error checking nav link transitions");
   }
 
   // Summary
@@ -220,8 +301,8 @@ async function runTailwindTests() {
     console.log("🕰️ The Clockwork Repairs website is ready for customers!");
   } else {
     console.log(`🔧 ${totalTests - passedTests} issues remaining. Keep debugging!`);
-    if (passedTests < 7) {
-      console.log("💡 Tip: Make sure you completed the SETUP section first");
+    if (passedTests < 5) {
+      console.log("💡 Tip: Make sure you completed SETUP-INSTRUCTIONS.md first");
     }
   }
 
